@@ -37,6 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late Future<List<Tarefa>> listaTarefas = getTarefas();
 
+  var tarefaController = TextEditingController();
+
   Future<List<Tarefa>> getTarefas() async {
     String url = '$baseURL/tarefas';
     final response = await http.get(Uri.parse(url));
@@ -49,8 +51,27 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void setTarefas() {
+  Future<void> postTarefa(String titulo) async {
+    String url = '$baseURL/tarefas/';
+
+    var corpo = json.jsonEncode({'titulo': titulo, 'concluida': false});
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-type': 'application/json'},
+      body: corpo,
+    );
+
+    if (response.statusCode == 201) {
+    } else {
+      throw Exception('Erro ao criar tarefa');
+    }
+  }
+
+  void criarTarefa() async {
+    await postTarefa('tarefa criada na alpha, como true');
     listaTarefas = getTarefas();
+    setState(() {});
   }
 
   @override
@@ -71,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Center(child: Text('Erro: ${snapshot.error}'));
           }
 
-          if(snapshot.hasData){
+          if (snapshot.hasData) {
             final tarefas = snapshot.data ?? [];
             return ListView.builder(
               itemCount: tarefas.length,
@@ -80,18 +101,49 @@ class _MyHomePageState extends State<MyHomePage> {
                 return ListTile(
                   title: Text(tarefa.titulo),
                   leading: Icon(
-                    tarefa.concluida ? Icons.check_circle : Icons.circle_outlined,
+                    tarefa.concluida
+                        ? Icons.check_circle
+                        : Icons.circle_outlined,
                     color: tarefa.concluida ? Colors.green : Colors.grey,
                   ),
                 );
-              });
+              },
+            );
           }
 
           return Container();
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: setTarefas,
+        onPressed: () {
+          tarefaController.text = '';
+          showDialog(
+            context: context,
+            builder: (BuildContext bc) {
+              return AlertDialog(
+                title: Text('Digite o nome da tarefa'),
+                content: TextField(controller: tarefaController),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await postTarefa(tarefaController.text);
+                      listaTarefas = getTarefas();
+                      setState(() {});
+                    },
+                    child: Text('Confirmar'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

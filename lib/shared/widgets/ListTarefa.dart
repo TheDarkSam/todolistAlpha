@@ -20,7 +20,11 @@ class _ListTarefaState extends State<ListTarefa> {
       leading: InkWell(
         onTap: () {
           bool concluida = !widget.tarefa.concluida;
-          _tarefaService.putTarefa(widget.tarefa.id.toString(), widget.tarefa.titulo, concluida);
+          _tarefaService.putTarefa(
+            widget.tarefa.id.toString(),
+            widget.tarefa.titulo,
+            concluida,
+          );
         },
         child: Icon(
           widget.tarefa.concluida ? Icons.check_circle : Icons.circle_outlined,

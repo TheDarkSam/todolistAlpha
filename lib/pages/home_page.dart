@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http_app/model/tarefa.dart';
 import 'package:http_app/service/tarefa_service.dart';
+import 'package:http_app/service/theme_provider_service.dart';
 import 'package:http_app/shared/widgets/ListTarefa.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,6 +18,8 @@ class _HomePageState extends State<HomePage> {
   final _tarefaService = TarefaService();
   late Future<List<Tarefa>> listaTarefas;
 
+  int _count = 0;
+
   @override
   void initState() {
     super.initState();
@@ -24,10 +28,24 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //final _themeProvider = Provider.of<ThemeProviderService>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Tarefas a fazer'),
+        actions: [
+          Consumer<ThemeProviderService>(
+            builder: (_, themeProvider, widget) {
+              return Switch(
+                value: themeProvider.themeStatus,
+                onChanged: (value) {
+                  themeProvider.themeStatus = !themeProvider.themeStatus;
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: listaTarefas,
